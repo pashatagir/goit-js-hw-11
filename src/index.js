@@ -20,7 +20,7 @@ const lightBox = new SimpleLightbox('.gallery a', {
 refs.searchFormEl.addEventListener('submit', onSearch);
 loadMoreButton.refs.button.addEventListener('click', onLoadMore);
 
-function onSearch(e) {
+async function onSearch(e) {
   e.preventDefault();
   imageApiService.query = e.currentTarget.elements.searchQuery.value.trim();
   if (imageApiService.query === '') {
@@ -29,7 +29,9 @@ function onSearch(e) {
   }
   imageApiService.resetPage();
   clear();
-  imageApiService.getImages().then(({ hits, totalHits }) => {
+  try {
+    const { hits, totalHits } = await imageApiService.getImages();
+
     if (totalHits === 0) {
       Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
@@ -42,12 +44,16 @@ function onSearch(e) {
     renderMarkup(hits);
     loadMoreButton.show();
     lightBox.refresh();
-  });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-function onLoadMore() {
+async function onLoadMore() {
   loadMoreButton.disable();
-  imageApiService.getImages().then(({ hits, totalHits }) => {
+
+  try {
+    const { hits, totalHits } = await imageApiService.getImages();
     if (hits.length < 40) {
       Notify.info("We're sorry, but you've reached the end of search results.");
       renderMarkup(hits);
@@ -55,7 +61,21 @@ function onLoadMore() {
       return;
     }
     renderMarkup(hits);
+    scroll();
     loadMoreButton.enable();
     lightBox.refresh();
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function scroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2.5,
+    behavior: 'smooth',
   });
 }
