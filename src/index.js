@@ -22,7 +22,11 @@ loadMoreButton.refs.button.addEventListener('click', onLoadMore);
 
 function onSearch(e) {
   e.preventDefault();
-  imageApiService.query = e.currentTarget.elements.searchQuery.value;
+  imageApiService.query = e.currentTarget.elements.searchQuery.value.trim();
+  if (imageApiService.query === '') {
+    Notify.info('Sorry, but something needs to be entered.');
+    return;
+  }
   imageApiService.resetPage();
   clear();
   imageApiService.getImages().then(({ hits, totalHits }) => {
