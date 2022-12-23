@@ -22,13 +22,17 @@ loadMoreButton.refs.button.addEventListener('click', onLoadMore);
 
 async function onSearch(e) {
   e.preventDefault();
+
   imageApiService.query = e.currentTarget.elements.searchQuery.value.trim();
+
   if (imageApiService.query === '') {
     Notify.info('Sorry, but something needs to be entered.');
     return;
   }
+
   imageApiService.resetPage();
   clear();
+
   try {
     const { hits, totalHits } = await imageApiService.getImages();
 
@@ -40,10 +44,10 @@ async function onSearch(e) {
       return;
     } else {
       Notify.success(`Hooray! We found ${totalHits} images.`);
+      renderMarkup(hits);
+      loadMoreButton.show();
+      lightBox.refresh();
     }
-    renderMarkup(hits);
-    loadMoreButton.show();
-    lightBox.refresh();
   } catch (error) {
     console.log(error);
   }
@@ -54,12 +58,13 @@ async function onLoadMore() {
 
   try {
     const { hits, totalHits } = await imageApiService.getImages();
+
     if (hits.length < 40) {
       Notify.info("We're sorry, but you've reached the end of search results.");
       renderMarkup(hits);
       loadMoreButton.hide();
-      return;
     }
+
     renderMarkup(hits);
     scroll();
     loadMoreButton.enable();
@@ -75,7 +80,7 @@ function scroll() {
     .firstElementChild.getBoundingClientRect();
 
   window.scrollBy({
-    top: cardHeight * 2.5,
+    top: cardHeight * 2.8,
     behavior: 'smooth',
   });
 }
